@@ -17,11 +17,12 @@ if BACKEND_DIR not in sys.path:
 
 from app import create_app
 
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
     port = int(os.environ.get('PORT', 5000))
     print("=" * 75)
-    print("🎓 AUTOMATED STUDENT OD & LEAVE APPROVAL WITH ATTENDANCE INTEGRATION")
-    print(f"🚀 Server running locally at: http://127.0.0.1:{port}")
+    print("AUTOMATED STUDENT OD & LEAVE APPROVAL WITH ATTENDANCE INTEGRATION")
+    print(f"Server running locally at: http://127.0.0.1:{port}")
     print("=" * 75)
     app.run(host='127.0.0.1', port=port, debug=False)
