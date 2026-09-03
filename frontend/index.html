@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automated Student OD & Leave Approval with Attendance Integration</title>
+  <meta name="description" content="Centralized college management system to automate student On-Duty (OD) and Leave requests, digital multi-tier approvals, and real-time attendance integration.">
+  
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5.3 CSS & FontAwesome Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
+  <!-- Custom Modern CSS -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- ==================== 1. LOGIN VIEW ==================== -->
+  <div id="login-view" class="login-page-wrapper">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="login-logo">
+          <i class="fas fa-university"></i>
+        </div>
+        <h3 class="mb-1">EduPortal ERP</h3>
+        <p class="text-muted small mb-0">Automated Student OD & Leave Approval with Attendance Integration</p>
+      </div>
+
+      <form id="login-form">
+        <div class="mb-3">
+          <label for="login-username" class="form-label small fw-bold">Username or Institutional Email</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fas fa-user text-muted"></i></span>
+            <input type="text" class="form-control" id="login-username" placeholder="e.g. student1, faculty1, admin" required>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <label for="login-password" class="form-label small fw-bold mb-0">Password</label>
+            <a href="#" class="small text-decoration-none" data-bs-toggle="modal" data-bs-target="#modal-forgot-password">Forgot password?</a>
+          </div>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fas fa-lock text-muted"></i></span>
+            <input type="password" class="form-control" id="login-password" placeholder="Enter your password" required>
+          </div>
+        </div>
+
+
+        <button type="submit" id="login-submit-btn" class="btn btn-primary-custom w-100 justify-content-center py-2 fs-6">
+          <i class="fas fa-sign-in-alt me-2"></i>Sign In to Portal
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ==================== 2. MAIN APP SHELL ==================== -->
+  <div id="app-shell" class="d-none">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon">
+          <i class="fas fa-graduation-cap"></i>
+        </div>
+        <div>
+          <div class="brand-title">EduPortal</div>
+          <div class="brand-subtitle">OD & Leave System</div>
+        </div>
+      </div>
+
+      <div class="sidebar-nav">
+        <!-- STUDENT LINKS -->
+        <div class="nav-role-student">
+          <div class="nav-section-title">Student Portal</div>
+          <a class="nav-link-custom active" data-view="student-dashboard" id="nav-student-dashboard">
+            <i class="fas fa-th-large"></i> <span>Dashboard</span>
+          </a>
+          <a class="nav-link-custom" data-view="student-attendance" id="nav-student-attendance">
+            <i class="fas fa-chart-pie"></i> <span>Attendance & OD</span>
+          </a>
+          <a class="nav-link-custom" data-view="student-requests" id="nav-student-requests">
+            <i class="fas fa-file-signature"></i> <span>My Requests</span>
+          </a>
+        </div>
+
+        <!-- FACULTY LINKS -->
+        <div class="nav-role-faculty d-none">
+          <div class="nav-section-title">Faculty Portal</div>
+          <a class="nav-link-custom" data-view="faculty-dashboard" id="nav-faculty-dashboard">
+            <i class="fas fa-tasks"></i> <span>Pending Approvals</span>
+          </a>
+          <a class="nav-link-custom" data-view="faculty-all-requests" id="nav-faculty-all">
+            <i class="fas fa-history"></i> <span>All Requests</span>
+          </a>
+        </div>
+
+        <!-- ADMIN / HOD LINKS -->
+        <div class="nav-role-admin d-none">
+          <div class="nav-section-title">HOD & Admin</div>
+          <a class="nav-link-custom" data-view="admin-dashboard" id="nav-admin-dashboard">
+            <i class="fas fa-tachometer-alt"></i> <span>Executive Overview</span>
+          </a>
+          <a class="nav-link-custom" data-view="admin-students" id="nav-admin-students">
+            <i class="fas fa-user-graduate"></i> <span>Student Directory</span>
+          </a>
+          <a class="nav-link-custom" data-view="admin-faculty" id="nav-admin-faculty">
+            <i class="fas fa-chalkboard-teacher"></i> <span>Faculty Directory</span>
+          </a>
+          <a class="nav-link-custom" data-view="admin-reports" id="nav-admin-reports">
+            <i class="fas fa-file-export"></i> <span>Analytics & Reports</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- User Profile Footer in Sidebar -->
+      <div class="sidebar-user">
+        <div class="user-avatar" id="sidebar-user-avatar">AP</div>
+        <div class="user-meta">
+          <div class="user-name" id="sidebar-user-name">Aarav Patel</div>
+          <span class="user-role-badge" id="sidebar-user-role">STUDENT</span>
+        </div>
+        <button class="btn btn-sm btn-link text-white-50 p-0" id="logout-btn" title="Sign Out">
+          <i class="fas fa-sign-out-alt fs-5"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main-wrapper">
+      
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle-btn" id="menu-toggle-btn" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="page-title" id="topbar-page-title">Dashboard</h1>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Notification Bell -->
+          <div class="notif-btn" id="topbar-notif-btn" title="In-App Notifications">
+            <i class="fas fa-bell"></i>
+            <span class="notif-badge d-none" id="topbar-notif-badge">0</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT CONTAINER -->
+      <div class="content-container">
+
+        <!-- ==================== VIEW: STUDENT DASHBOARD ==================== -->
+        <section id="view-student-dashboard" class="view-section">
+          <!-- Student Profile Banner -->
+          <div class="profile-banner">
+            <div class="banner-content">
+              <div class="d-flex align-items-center gap-3">
+                <div class="banner-avatar" id="student-banner-avatar">AP</div>
+                <div class="banner-info">
+                  <h2 id="student-banner-name">Aarav Patel</h2>
+                  <div class="banner-meta" id="student-banner-meta">
+                    <!-- Dynamic metadata -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Apply Action Buttons -->
+              <div class="d-flex gap-2">
+                <button class="btn btn-od-custom" data-bs-toggle="modal" data-bs-target="#modal-apply-od">
+                  <i class="fas fa-plus-circle me-1"></i>Apply On-Duty (OD)
+                </button>
+                <button class="btn btn-light fw-bold" data-bs-toggle="modal" data-bs-target="#modal-apply-leave">
+                  <i class="fas fa-calendar-plus me-1 text-danger"></i>Apply Leave
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Student KPI Cards -->
+          <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-sm-6">
+              <div class="stat-card success">
+                <div>
+                  <div class="stat-label">Effective Attendance</div>
+                  <div class="stat-value text-success" id="student-kpi-overall-perc">--%</div>
+                  <div class="small text-muted mt-1"><i class="fas fa-shield-alt text-success me-1"></i>Requirement: &ge; 75%</div>
+                </div>
+                <div class="stat-icon success"><i class="fas fa-percentage"></i></div>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-sm-6">
+              <div class="stat-card primary">
+                <div>
+                  <div class="stat-label">Approved OD Classes</div>
+                  <div class="stat-value text-primary" id="student-kpi-od">0</div>
+                  <div class="small text-muted mt-1">Converted to attendance credit</div>
+                </div>
+                <div class="stat-icon primary"><i class="fas fa-award"></i></div>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-sm-6">
+              <div class="stat-card warning">
+                <div>
+                  <div class="stat-label">Pending Requests</div>
+                  <div class="stat-value text-warning" id="student-kpi-pending-req">0</div>
+                  <div class="small text-muted mt-1">Under faculty/HOD review</div>
+                </div>
+                <div class="stat-icon warning"><i class="fas fa-clock"></i></div>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-sm-6">
+              <div class="stat-card purple">
+                <div>
+                  <div class="stat-label">Approved Requests</div>
+                  <div class="stat-value" style="color: var(--od-purple);" id="student-kpi-approved-req">0</div>
+                  <div class="small text-muted mt-1">Sanctioned by HOD</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-check-circle"></i></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Requests Table -->
+          <div class="app-card mb-4">
+            <div class="app-card-header">
+              <h2 class="app-card-title"><i class="fas fa-file-signature text-primary"></i>My Recent OD & Leave Requests</h2>
+              <button class="btn btn-sm btn-outline-primary" onclick="App.switchView('student-requests')">
+                View All Requests &rarr;
+              </button>
+            </div>
+            <div class="app-card-body p-0">
+              <div class="table-responsive">
+                <table class="table-custom">
+                  <thead>
+                    <tr>
+                      <th>Request ID</th>
+                      <th>Type</th>
+                      <th>Event / Details</th>
+                      <th>Dates</th>
+                      <th>Approval Status</th>
+                      <th>Attendance Credit</th>
+                      <th>Submitted On</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="student-requests-tbody">
+                    <!-- Dynamic Requests -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: STUDENT ATTENDANCE ==================== -->
+        <section id="view-student-attendance" class="view-section d-none">
+          <div class="alert alert-primary d-flex align-items-center mb-4">
+            <i class="fas fa-info-circle fs-3 me-3"></i>
+            <div>
+              <div class="fw-bold">Automated Attendance Integration Active</div>
+              <div class="small">
+                Formula: <strong>Effective Attendance % = (Regular Attended Classes + Approved OD Classes) / Total Classes Conducted &times; 100</strong>.
+                When your On-Duty requests receive final HOD approval, classes for the sanctioned dates are automatically credited to your attendance.
+              </div>
+            </div>
+          </div>
+
+          <!-- Subject Breakdown Table -->
+          <div class="app-card mb-4">
+            <div class="app-card-header">
+              <h2 class="app-card-title"><i class="fas fa-book-reader text-primary"></i>Subject-Wise Attendance Breakdown</h2>
+            </div>
+            <div class="app-card-body p-0">
+              <div class="table-responsive">
+                <table class="table-custom">
+                  <thead>
+                    <tr>
+                      <th>Subject Code & Name</th>
+                      <th>Course Faculty</th>
+                      <th class="text-center">Conducted</th>
+                      <th class="text-center">Attended</th>
+                      <th class="text-center">Approved OD</th>
+                      <th class="text-center">Absent</th>
+                      <th>Effective Attendance %</th>
+                    </tr>
+                  </thead>
+                  <tbody id="student-subjects-tbody">
+                    <!-- Dynamic Subjects -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily Attendance Audit History -->
+          <div class="app-card">
+            <div class="app-card-header">
+              <h2 class="app-card-title"><i class="fas fa-history text-secondary"></i>Daily Attendance Audit Log</h2>
+            </div>
+            <div class="app-card-body p-0">
+              <div class="table-responsive">
+                <table class="table-custom">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Subject</th>
+                      <th>Status</th>
+                      <th>Source</th>
+                      <th>Linked Request</th>
+                    </tr>
+                  </thead>
+                  <tbody id="student-history-tbody">
+                    <!-- Dynamic Daily Log -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: STUDENT MY REQUESTS ==================== -->
+        <section id="view-student-requests" class="view-section d-none">
+          <div class="app-card">
+            <div class="app-card-header flex-wrap gap-3">
+              <h2 class="app-card-title"><i class="fas fa-folder-open text-primary"></i>All My OD & Leave Submissions</h2>
+              
+              <!-- Filters -->
+              <div class="d-flex gap-2 flex-wrap">
+                <input type="text" class="form-control form-control-sm" id="student-req-search" placeholder="Search event / reason..." style="width: 200px;">
+                <select class="form-select form-select-sm" id="student-req-type-filter" style="width: 130px;">
+                  <option value="">All Types</option>
+                  <option value="OD">On-Duty (OD)</option>
+                  <option value="LEAVE">Leave</option>
+                </select>
+                <select class="form-select form-select-sm" id="student-req-status-filter" style="width: 160px;">
+                  <option value="">All Statuses</option>
+                  <option value="PENDING_FACULTY">Pending Faculty</option>
+                  <option value="PENDING_HOD">Pending HOD</option>
+                  <option value="APPROVED">Approved</option>
+                  <option value="REJECTED_FACULTY">Rejected by Faculty</option>
+                  <option value="REJECTED_HOD">Rejected by HOD</option>
+                </select>
+              </div>
+            </div>
+            <div class="app-card-body p-0">
+              <div class="table-responsive">
+                <table class="table-custom">
+                  <thead>
+                    <tr>
+                      <th>Request ID</th>
+                      <th>Type</th>
+                      <th>Event / Details</th>
+                      <th>Dates</th>
+                      <th>Approval Status</th>
+                      <th>Attendance Credit</th>
+                      <th>Submitted On</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="student-requests-tbody-full">
+                    <!-- Uses the same dynamic render logic -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: FACULTY DASHBOARD ==================== -->
+        <section id="view-faculty-dashboard" class="view-section d-none">
+          <!-- Faculty KPI Cards -->
+          <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-sm-6">
+              <div class="stat-card primary">
+                <div>
+                  <div class="stat-label">Mentored Students</div>
+                  <div class="stat-value text-primary" id="faculty-kpi-students">0</div>
+                  <div class="small text-muted mt-1">Assigned 3rd Year CSE</div>
+                </div>
+                <div class="stat-icon primary"><i class="fas fa-users"></i></div>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-sm-6">
+              <div class="stat-card warning">
+                <div>
+                  <div class="stat-label">Pending OD Requests</div>
+                  <div class="stat-value text-warning" id="faculty-kpi-pending-od">0</div>
+                  <div class="small text-muted mt-1">Requires your recommendation</div>
+                </div>
+                <div class="stat-icon warning"><i class="fas fa-award"></i></div>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-sm-6">
+              <div class="stat-card danger">
+                <div>
+                  <div class="stat-label">Pending Leave Requests</div>
+                  <div class="stat-value text-danger" id="faculty-kpi-pending-leave">0</div>
+                  <div class="small text-muted mt-1">Medical / Personal leave</div>
+                </div>
+                <div class="stat-icon danger"><i class="fas fa-calendar-minus"></i></div>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-sm-6">
+              <div class="stat-card success">
+                <div>
+                  <div class="stat-label">Approved & Forwarded</div>
+                  <div class="stat-value text-success" id="faculty-kpi-approved">0</div>
+                  <div class="small text-muted mt-1">Forwarded to HOD</div>
+                </div>
+                <div class="stat-icon success"><i class="fas fa-check-double"></i></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pending Verification Queue Table -->
+          <div class="app-card">
+            <div class="app-card-header">
+              <h2 class="app-card-title"><i class="fas fa-tasks text-warning"></i>Pending Student Verification Queue</h2>
+              <span class="badge bg-warning-subtle text-warning fw-bold">Action Required</span>
+            </div>
+            <div class="app-card-body p-0">
+              <div class="table-responsive">
+                <table class="table-custom">
+                  <thead>
+                    <tr>
+                      <th>Request ID</th>
+                      <th>Student Details</th>
+                      <th>Type</th>
+                      <th>Event / Reason</th>
+                      <th>Dates</th>
+                      <th>Current Attendance</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="faculty-pending-tbody">
+                    <!-- Dynamic Pending Requests -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: FACULTY ALL REQUESTS ==================== -->
+        <section id="view-faculty-all-requests" class="view-section d-none">
+          <div class="app-card">
+            <div class="app-card-header">
+              <h2 class="app-card-title"><i class="fas fa-history text-primary"></i>Department Request History</h2>
+            </div>
+            <div class="app-card-body p-0">
+              <div class="table-responsive">
+                <table class="table-custom">
+                  <thead>
+                    <tr>
+                      <th>Request ID</th>
+                      <th>Student</th>
+                      <th>Type</th>
+                      <th>Dates</th>
+                      <th>Reason</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="faculty-all-tbody">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: ADMIN / HOD DASHBOARD ==================== -->
+        <section id="view-admin-dashboard" class="view-section d-none">
+          <!-- Admin KPI Cards -->
+          <div class="row g-4 mb-4">
+            <div class="col-xl-2 col-md-4 col-sm-6">
+              <div class="stat-card primary">
+                <div>
+                  <div class="stat-label">Students</div>
+                  <div class="stat-value text-primary" id="admin-kpi-students">0</div>
+                </div>
+                <div class="stat-icon primary"><i class="fas fa-user-graduate"></i></div>
+              </div>
+            </div>
+
+            <div class="col-xl-2 col-md-4 col-sm-6">
+              <div class="stat-card purple">
+                <div>
+                  <div class="stat-label">Faculty</div>
+                  <div class="stat-value" style="color: var(--od-purple);" id="admin-kpi-faculty">0</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-chalkboard-teacher"></i></div>
+              </div>
+            </div>
+
+            <div class="col-xl-2 col-md-4 col-sm-6">
+              <div class="stat-card warning">
+                <div>
+                  <div class="stat-label">Pending Sanction</div>
+                  <div class="stat-value text-warning" id="admin-kpi-pending">0</div>
+                </div>
+                <div class="stat-icon warning"><i class="fas fa-hourglass-half"></i></div>
+              </div>
+            </div>
+
+            <div class="col-xl-2 col-md-4 col-sm-6">
+              <div class="stat-card success">
+                <div>
+                  <div class="stat-label">Approved</div>
+                  <div class="stat-value text-success" id="admin-kpi-approved">0</div>
+                </div>
+                <div class="stat-icon success"><i class="fas fa-check-circle"></i></div>
+              </div>
+            </div>
+
+            <div class="col-xl-2 col-md-4 col-sm-6">
+              <div class="stat-card danger">
+                <div>
+                  <div class="stat-label">Rejected</div>
+                  <div class="stat-value text-danger" id="admin-kpi-rejected">0</div>
+                </div>
+                <div class="stat-icon danger"><i class="fas fa-times-circle"></i></div>
+              </div>
+            </div>
+
+            <div class="col-xl-2 col-md-4 col-sm-6">
+              <div class="stat-card success">
+                <div>
+                  <div class="stat-label">Dept Avg Att.</div>
+                  <div class="stat-value text-success" id="admin-kpi-avg-att">--%</div>
+                </div>
+                <div class="stat-icon success"><i class="fas fa-chart-line"></i></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Request Management & Final Sanctions Table -->
+          <div class="app-card">
+            <div class="app-card-header flex-wrap gap-3">
+              <h2 class="app-card-title"><i class="fas fa-gavel text-primary"></i>Request Management & Attendance Sanctions</h2>
+              
+              <!-- Multi-Filter Bar -->
+              <div class="d-flex gap-2 flex-wrap">
+                <input type="text" class="form-control form-control-sm" id="admin-search-req" placeholder="Search student / code..." style="width: 180px;">
+                <select class="form-select form-select-sm" id="admin-filter-dept" style="width: 100px;">
+                  <option value="">Dept</option>
+                  <option value="CSE">CSE</option>
+                </select>
+                <select class="form-select form-select-sm" id="admin-filter-year" style="width: 100px;">
+                  <option value="">Year</option>
+                  <option value="3">3rd Year</option>
+                </select>
+                <select class="form-select form-select-sm" id="admin-filter-type" style="width: 110px;">
+                  <option value="">Type</option>
+                  <option value="OD">OD</option>
+                  <option value="LEAVE">Leave</option>
+                </select>
+                <select class="form-select form-select-sm" id="admin-filter-status" style="width: 150px;">
+                  <option value="">All Statuses</option>
+                  <option value="PENDING_HOD">Pending HOD</option>
+                  <option value="PENDING_FACULTY">Pending Faculty</option>
+                  <option value="APPROVED">Approved</option>
+                  <option value="REJECTED_FACULTY">Rejected (Faculty)</option>
+                  <option value="REJECTED_HOD">Rejected (HOD)</option>
+                </select>
+              </div>
+            </div>
+            <div class="app-card-body p-0">
+              <div class="table-responsive">
+                <table class="table-custom">
+                  <thead>
+                    <tr>
+                      <th>Request Code</th>
+                      <th>Student Name & Reg</th>
+                      <th>Type</th>
+                      <th>Event / Reason</th>
+                      <th>Dates</th>
+                      <th>Status</th>
+                      <th>Attendance Integrated</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-requests-tbody">
+                    <!-- Dynamic Requests -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: ADMIN STUDENTS ==================== -->
+        <section id="view-admin-students" class="view-section d-none">
+          <div class="app-card">
+            <div class="app-card-header">
+              <h2 class="app-card-title"><i class="fas fa-user-graduate text-primary"></i>Student Directory & Attendance Profiles</h2>
+              <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#modal-add-student">
+                <i class="fas fa-plus me-1"></i>Add New Student
+              </button>
+            </div>
+            <div class="app-card-body p-0">
+              <div class="table-responsive">
+                <table class="table-custom">
+                  <thead>
+                    <tr>
+                      <th>Register No</th>
+                      <th>Student Name & Contact</th>
+                      <th>Department</th>
+                      <th>Year & Section</th>
+                      <th>Mentor Faculty</th>
+                      <th>Overall Attendance</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-students-tbody">
+                    <!-- Dynamic Students -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: ADMIN FACULTY ==================== -->
+        <section id="view-admin-faculty" class="view-section d-none">
+          <div class="app-card">
+            <div class="app-card-header">
+              <h2 class="app-card-title"><i class="fas fa-chalkboard-teacher text-primary"></i>Faculty Directory</h2>
+              <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#modal-add-faculty">
+                <i class="fas fa-plus me-1"></i>Add New Faculty
+              </button>
+            </div>
+            <div class="app-card-body p-0">
+              <div class="table-responsive">
+                <table class="table-custom">
+                  <thead>
+                    <tr>
+                      <th>Faculty ID</th>
+                      <th>Faculty Name & Contact</th>
+                      <th>Department</th>
+                      <th>Designation</th>
+                      <th class="text-center">Mentored Students</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-faculty-tbody">
+                    <!-- Dynamic Faculty -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VIEW: ADMIN REPORTS ==================== -->
+        <section id="view-admin-reports" class="view-section d-none">
+          <div class="app-card mb-4">
+            <div class="app-card-header">
+              <h2 class="app-card-title"><i class="fas fa-file-export text-primary"></i>Generate OD, Leave & Attendance Reports</h2>
+            </div>
+            <div class="app-card-body">
+              <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                  <label for="report-type-select" class="form-label small fw-bold">Report Type</label>
+                  <select class="form-select" id="report-type-select">
+                    <option value="requests">OD & Leave Requests Report</option>
+                    <option value="attendance">Student Subject Attendance Report</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label for="report-dept-select" class="form-label small fw-bold">Department</label>
+                  <select class="form-select" id="report-dept-select">
+                    <option value="">All Departments</option>
+                    <option value="CSE">CSE</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label for="report-year-select" class="form-label small fw-bold">Year</label>
+                  <select class="form-select" id="report-year-select">
+                    <option value="">All Years</option>
+                    <option value="3">3rd Year</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label for="report-status-select" class="form-label small fw-bold">Status</label>
+                  <select class="form-select" id="report-status-select">
+                    <option value="">All Statuses</option>
+                    <option value="APPROVED">Approved Only</option>
+                    <option value="PENDING_FACULTY">Pending Faculty</option>
+                    <option value="PENDING_HOD">Pending HOD</option>
+                    <option value="REJECTED_FACULTY">Rejected (Faculty)</option>
+                    <option value="REJECTED_HOD">Rejected (HOD)</option>
+                  </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                  <button class="btn btn-primary-custom flex-grow-1" id="report-generate-btn">
+                    <i class="fas fa-chart-bar me-1"></i>Generate
+                  </button>
+                  <button class="btn btn-outline-success" id="report-export-csv-btn" title="Export as CSV">
+                    <i class="fas fa-file-csv me-1"></i>CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Report Results Table -->
+          <div class="app-card">
+            <div class="app-card-header">
+              <h2 class="app-card-title"><i class="fas fa-table text-secondary"></i>Report Results</h2>
+              <span class="badge bg-light text-dark fw-bold" id="report-result-count">0 records found</span>
+            </div>
+            <div class="app-card-body p-0">
+              <div class="table-responsive">
+                <table class="table-custom">
+                  <thead id="report-table-thead">
+                    <!-- Dynamic Headers -->
+                  </thead>
+                  <tbody id="report-table-tbody">
+                    <!-- Dynamic Report Rows -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- MODAL: Apply OD -->
+  <div class="modal fade" id="modal-apply-od" tabindex="-1" aria-labelledby="modal-apply-od-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="modal-apply-od-title"><i class="fas fa-award me-2"></i>Apply for On-Duty (OD)</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="form-apply-od">
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="od-event-name" class="form-label small fw-bold">Event Name *</label>
+                <input type="text" name="event_name" id="od-event-name" class="form-control" placeholder="e.g. National Hackathon 2026" required>
+              </div>
+              <div class="col-md-6">
+                <label for="od-event-type" class="form-label small fw-bold">Event Type *</label>
+                <select name="event_type" id="od-event-type" class="form-select" required>
+                  <option value="Technical Symposium">Technical Symposium</option>
+                  <option value="Hackathon / Tech Competition">Hackathon / Tech Competition</option>
+                  <option value="Paper Presentation">Paper Presentation</option>
+                  <option value="Workshop / Seminar">Workshop / Seminar</option>
+                  <option value="Sports & Athletics">Sports & Athletics</option>
+                  <option value="Cultural / Extra-curricular">Cultural / Extra-curricular</option>
+                  <option value="Internship / Industry Visit">Internship / Industry Visit</option>
+                  <option value="Other">Other Academic Event</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label for="od-start-date" class="form-label small fw-bold">Start Date *</label>
+                <input type="date" name="start_date" id="od-start-date" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label for="od-end-date" class="form-label small fw-bold">End Date (if multi-day)</label>
+                <input type="date" name="end_date" id="od-end-date" class="form-control">
+              </div>
+
+              <div class="col-12">
+                <label for="od-venue" class="form-label small fw-bold">Event Venue / Host Institution *</label>
+                <input type="text" name="venue" id="od-venue" class="form-control" placeholder="e.g. IIT Madras Research Park" required>
+              </div>
+
+              <div class="col-12">
+                <label for="od-reason" class="form-label small fw-bold">Reason & Participation Details *</label>
+                <textarea name="reason" id="od-reason" class="form-control" rows="3" placeholder="Describe the event, your role, and how it benefits your academic track..." required></textarea>
+              </div>
+
+              <div class="col-12">
+                <label for="od-document" class="form-label small fw-bold">Upload Supporting Proof / Invitation (PDF/JPG/PNG) *</label>
+                <input type="file" name="document" id="od-document" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                <div class="form-text">Attach event brochure, acceptance letter, or registration confirmation.</div>
+              </div>
+
+              <div class="col-12">
+                <label for="od-remarks" class="form-label small fw-bold">Optional Remarks</label>
+                <input type="text" name="remarks" id="od-remarks" class="form-control" placeholder="Any additional notes for your class advisor...">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary-custom">
+              <i class="fas fa-paper-plane me-1"></i>Submit OD Request
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Apply Leave -->
+  <div class="modal fade" id="modal-apply-leave" tabindex="-1" aria-labelledby="modal-apply-leave-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="modal-apply-leave-title"><i class="fas fa-calendar-minus me-2"></i>Apply for Leave</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="form-apply-leave">
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="leave-type" class="form-label small fw-bold">Leave Type *</label>
+                <select name="leave_type" id="leave-type" class="form-select" required>
+                  <option value="Medical Leave">Medical Leave</option>
+                  <option value="Sick Leave">Sick Leave</option>
+                  <option value="Personal Leave">Personal Leave</option>
+                  <option value="Family Function">Family Function</option>
+                  <option value="Emergency Leave">Emergency Leave</option>
+                  <option value="Academic Leave">Academic Leave</option>
+                </select>
+              </div>
+
+              <div class="col-md-3">
+                <label for="leave-start-date" class="form-label small fw-bold">Start Date *</label>
+                <input type="date" name="start_date" id="leave-start-date" class="form-control" required>
+              </div>
+              <div class="col-md-3">
+                <label for="leave-end-date" class="form-label small fw-bold">End Date</label>
+                <input type="date" name="end_date" id="leave-end-date" class="form-control">
+              </div>
+
+              <div class="col-12">
+                <label for="leave-reason" class="form-label small fw-bold">Reason for Leave *</label>
+                <textarea name="reason" id="leave-reason" class="form-control" rows="3" placeholder="Provide reason for absence..." required></textarea>
+              </div>
+
+              <div class="col-12">
+                <label for="leave-document" class="form-label small fw-bold">Upload Supporting Document (Optional / Medical Certificate)</label>
+                <input type="file" name="document" id="leave-document" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+              </div>
+
+              <div class="col-12">
+                <label for="leave-remarks" class="form-label small fw-bold">Remarks</label>
+                <input type="text" name="remarks" id="leave-remarks" class="form-control" placeholder="Optional remarks...">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-danger">
+              <i class="fas fa-paper-plane me-1"></i>Submit Leave Request
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Request Details & Timeline -->
+  <div class="modal fade" id="modal-request-details" tabindex="-1" aria-labelledby="modal-req-details-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="d-flex align-items-center gap-2">
+            <h5 class="modal-title font-monospace fw-bold" id="modal-req-code">OD-2026-001</h5>
+            <span id="modal-req-type-badge"></span>
+            <span id="modal-req-status-badge"></span>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Student Profile Card in modal -->
+          <div class="p-3 bg-light rounded mb-3" id="modal-req-student-info"></div>
+
+          <!-- Request Details -->
+          <div id="modal-req-details-content" class="mb-3"></div>
+
+          <!-- Attendance Status Banner -->
+          <div id="modal-req-attendance-status" class="mb-4"></div>
+
+          <!-- Approval Audit Timeline -->
+          <h6 class="fw-bold border-bottom pb-2 mb-3"><i class="fas fa-stream me-2 text-primary"></i>Approval Workflow Audit Trail</h6>
+          <div class="timeline-stepper" id="modal-req-timeline"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Faculty Review & Forward -->
+  <div class="modal fade" id="modal-faculty-review" tabindex="-1" aria-labelledby="modal-faculty-review-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="modal-faculty-review-title"><i class="fas fa-tasks me-2"></i>Review Student Request</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="p-3 bg-light rounded mb-3">
+            <div class="row g-2">
+              <div class="col-sm-6"><strong>Request Code:</strong> <span id="faculty-modal-req-code" class="font-monospace text-primary fw-bold"></span></div>
+              <div class="col-sm-6"><strong>Student:</strong> <span id="faculty-modal-student" class="fw-bold"></span></div>
+              <div class="col-sm-6"><strong>Class:</strong> <span id="faculty-modal-class"></span></div>
+              <div class="col-sm-6"><strong>Type:</strong> <span id="faculty-modal-type"></span></div>
+              <div class="col-sm-6"><strong>Dates:</strong> <span id="faculty-modal-dates"></span></div>
+            </div>
+            <div class="mt-2"><strong>Reason:</strong> <span id="faculty-modal-reason" class="text-muted"></span></div>
+          </div>
+
+          <!-- Attached Document Preview -->
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Document Verification:</label>
+            <div id="faculty-modal-doc-preview"></div>
+          </div>
+
+          <!-- Review Remarks -->
+          <div class="mb-3">
+            <label for="faculty-modal-remarks" class="form-label small fw-bold">Faculty Remarks / Recommendation</label>
+            <textarea id="faculty-modal-remarks" class="form-control" rows="2" placeholder="Add recommendation remarks (mandatory if rejecting)..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-danger" id="faculty-modal-reject-btn">
+            <i class="fas fa-times me-1"></i>Reject Request
+          </button>
+          <button type="button" class="btn btn-primary-custom" id="faculty-modal-approve-btn">
+            <i class="fas fa-check me-1"></i>Approve & Forward to HOD
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Admin / HOD Sanction & Attendance Integration -->
+  <div class="modal fade" id="modal-admin-review" tabindex="-1" aria-labelledby="modal-admin-review-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title" id="modal-admin-review-title"><i class="fas fa-gavel me-2"></i>HOD Sanction & Attendance Integration</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="p-3 bg-light rounded mb-3">
+            <div class="row g-2">
+              <div class="col-sm-6"><strong>Request:</strong> <span id="admin-modal-req-code" class="font-monospace text-primary fw-bold"></span></div>
+              <div class="col-sm-6"><strong>Student:</strong> <span id="admin-modal-student" class="fw-bold"></span></div>
+              <div class="col-sm-6"><strong>Type:</strong> <span id="admin-modal-type"></span></div>
+              <div class="col-sm-6"><strong>Dates:</strong> <span id="admin-modal-dates"></span></div>
+            </div>
+            <div class="mt-2"><strong>Reason:</strong> <span id="admin-modal-reason"></span></div>
+            <div class="mt-2 small text-primary"><strong>Faculty Recommendation:</strong> <span id="admin-modal-faculty-remarks"></span></div>
+          </div>
+
+          <div class="alert alert-warning py-2 mb-3 small d-flex align-items-center">
+            <i class="fas fa-bolt fs-4 me-2 text-warning"></i>
+            <div>
+              <strong>Attendance Automation Rule:</strong> Approving an OD request will automatically credit all enrolled subject class periods for the sanctioned dates. Duplicate updates are strictly prevented.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="admin-modal-remarks" class="form-label small fw-bold">HOD Sanction Remarks</label>
+            <textarea id="admin-modal-remarks" class="form-control" rows="2" placeholder="Sanction remarks (e.g. Sanctioned with OD attendance credit)..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-danger" id="admin-modal-reject-btn">
+            <i class="fas fa-times me-1"></i>Reject
+          </button>
+          <button type="button" class="btn btn-success fw-bold" id="admin-modal-approve-btn">
+            <i class="fas fa-check-double me-1"></i>Grant Final Approval & Integrate Attendance
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Add Student -->
+  <div class="modal fade" id="modal-add-student" tabindex="-1" aria-labelledby="modal-add-student-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-add-student-title">Add New Student</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="form-add-student">
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="add-student-regno" class="form-label small fw-bold">Register Number *</label>
+                <input type="text" name="register_number" id="add-student-regno" class="form-control" placeholder="e.g. 22CS011" required>
+              </div>
+              <div class="col-md-6">
+                <label for="add-student-name" class="form-label small fw-bold">Full Name *</label>
+                <input type="text" name="name" id="add-student-name" class="form-control" placeholder="e.g. K. Karthik" required>
+              </div>
+              <div class="col-md-6">
+                <label for="add-student-dept" class="form-label small fw-bold">Department *</label>
+                <input type="text" name="department" id="add-student-dept" class="form-control" value="CSE" required>
+              </div>
+              <div class="col-md-3">
+                <label for="add-student-year" class="form-label small fw-bold">Year *</label>
+                <select name="year" id="add-student-year" class="form-select">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3" selected>3</option>
+                  <option value="4">4</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label for="add-student-section" class="form-label small fw-bold">Section *</label>
+                <input type="text" name="section" id="add-student-section" class="form-control" value="A" required>
+              </div>
+              <div class="col-12">
+                <label for="add-student-email" class="form-label small fw-bold">Email Address *</label>
+                <input type="email" name="email" id="add-student-email" class="form-control" placeholder="student@college.edu" required>
+              </div>
+              <div class="col-md-6">
+                <label for="add-student-phone" class="form-label small fw-bold">Phone</label>
+                <input type="text" name="phone" id="add-student-phone" class="form-control" placeholder="9123456789">
+              </div>
+              <div class="col-md-6">
+                <label for="add-student-mentor" class="form-label small fw-bold">Assign Mentor / Advisor</label>
+                <select name="mentor_faculty_id" id="add-student-mentor" class="form-select"></select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary-custom">Create Student</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Edit Student -->
+  <div class="modal fade" id="modal-edit-student" tabindex="-1" aria-labelledby="modal-edit-student-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-edit-student-title">Edit Student Profile</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="form-edit-student">
+          <input type="hidden" id="edit-student-id">
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="edit-student-regno" class="form-label small fw-bold">Register Number</label>
+                <input type="text" id="edit-student-regno" class="form-control bg-light" readonly>
+              </div>
+              <div class="col-md-6">
+                <label for="edit-student-name" class="form-label small fw-bold">Full Name</label>
+                <input type="text" name="name" id="edit-student-name" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label for="edit-student-dept" class="form-label small fw-bold">Department</label>
+                <input type="text" name="department" id="edit-student-dept" class="form-control" required>
+              </div>
+              <div class="col-md-3">
+                <label for="edit-student-year" class="form-label small fw-bold">Year</label>
+                <input type="number" name="year" id="edit-student-year" class="form-control" required>
+              </div>
+              <div class="col-md-3">
+                <label for="edit-student-section" class="form-label small fw-bold">Section</label>
+                <input type="text" name="section" id="edit-student-section" class="form-control" required>
+              </div>
+              <div class="col-12">
+                <label for="edit-student-email" class="form-label small fw-bold">Email</label>
+                <input type="email" name="email" id="edit-student-email" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label for="edit-student-phone" class="form-label small fw-bold">Phone</label>
+                <input type="text" name="phone" id="edit-student-phone" class="form-control">
+              </div>
+              <div class="col-md-6">
+                <label for="edit-student-mentor" class="form-label small fw-bold">Mentor</label>
+                <select name="mentor_faculty_id" id="edit-student-mentor" class="form-select"></select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Add Faculty -->
+  <div class="modal fade" id="modal-add-faculty" tabindex="-1" aria-labelledby="modal-add-faculty-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-add-faculty-title">Add Faculty Member</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="form-add-faculty">
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="add-faculty-code" class="form-label small fw-bold">Faculty ID *</label>
+                <input type="text" name="faculty_id" id="add-faculty-code" class="form-control" placeholder="e.g. FAC004" required>
+              </div>
+              <div class="col-md-6">
+                <label for="add-faculty-name" class="form-label small fw-bold">Full Name *</label>
+                <input type="text" name="name" id="add-faculty-name" class="form-control" placeholder="e.g. Dr. M. Sundar" required>
+              </div>
+              <div class="col-md-6">
+                <label for="add-faculty-dept" class="form-label small fw-bold">Department *</label>
+                <input type="text" name="department" id="add-faculty-dept" class="form-control" value="CSE" required>
+              </div>
+              <div class="col-md-6">
+                <label for="add-faculty-desig" class="form-label small fw-bold">Designation *</label>
+                <input type="text" name="designation" id="add-faculty-desig" class="form-control" value="Assistant Professor" required>
+              </div>
+              <div class="col-12">
+                <label for="add-faculty-email" class="form-label small fw-bold">Email *</label>
+                <input type="email" name="email" id="add-faculty-email" class="form-control" placeholder="faculty@college.edu" required>
+              </div>
+              <div class="col-12">
+                <label for="add-faculty-phone" class="form-label small fw-bold">Phone</label>
+                <input type="text" name="phone" id="add-faculty-phone" class="form-control" placeholder="9876543210">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary-custom">Create Faculty</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Edit Faculty -->
+  <div class="modal fade" id="modal-edit-faculty" tabindex="-1" aria-labelledby="modal-edit-faculty-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-edit-faculty-title">Edit Faculty Member</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="form-edit-faculty">
+          <input type="hidden" id="edit-faculty-id">
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="edit-faculty-code" class="form-label small fw-bold">Faculty ID</label>
+                <input type="text" id="edit-faculty-code" class="form-control bg-light" readonly>
+              </div>
+              <div class="col-md-6">
+                <label for="edit-faculty-name" class="form-label small fw-bold">Full Name</label>
+                <input type="text" name="name" id="edit-faculty-name" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label for="edit-faculty-dept" class="form-label small fw-bold">Department</label>
+                <input type="text" name="department" id="edit-faculty-dept" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label for="edit-faculty-desig" class="form-label small fw-bold">Designation</label>
+                <input type="text" name="designation" id="edit-faculty-desig" class="form-control" required>
+              </div>
+              <div class="col-12">
+                <label for="edit-faculty-email" class="form-label small fw-bold">Email</label>
+                <input type="email" name="email" id="edit-faculty-email" class="form-control" required>
+              </div>
+              <div class="col-12">
+                <label for="edit-faculty-phone" class="form-label small fw-bold">Phone</label>
+                <input type="text" name="phone" id="edit-faculty-phone" class="form-control">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: In-App Notifications Drawer -->
+  <div class="modal fade" id="modal-notifications" tabindex="-1" aria-labelledby="modal-notif-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-notif-title"><i class="fas fa-bell me-2 text-primary"></i>In-App Notifications</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0" style="max-height: 450px; overflow-y: auto;" id="notifications-list-container">
+          <!-- Dynamic notifications -->
+        </div>
+        <div class="modal-footer justify-content-between">
+          <button type="button" class="btn btn-sm btn-outline-primary" id="notif-mark-all-read-btn">
+            <i class="fas fa-check-double me-1"></i>Mark All Read
+          </button>
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Forgot Password -->
+  <div class="modal fade" id="modal-forgot-password" tabindex="-1" aria-labelledby="modal-forgot-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-forgot-title">Reset Password</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="forgot-password-form">
+          <div class="modal-body">
+            <p class="text-muted small">Enter your registered institutional email address. We will verify your identity and send a reset link.</p>
+            <div class="mb-3">
+              <label for="forgot-email" class="form-label small fw-bold">Institutional Email</label>
+              <input type="email" id="forgot-email" class="form-control" placeholder="e.g. aarav.patel@student.college.edu" required>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Send Reset Link</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100;"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/student.js"></script>
+  <script src="/js/faculty.js"></script>
+  <script src="/js/admin.js"></script>
+  <script src="/js/notifications.js"></script>
+  <script src="/js/reports.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
