@@ -11,9 +11,22 @@ from datetime import datetime, date, timedelta
 DB_PATH = os.path.join(os.path.dirname(__file__), 'od_leave_system.db')
 
 def get_db_connection():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(
+        DB_PATH,
+        timeout=30,
+        check_same_thread=False
+    )
     conn.row_factory = sqlite3.Row
+
+    # Enable foreign key constraints
     conn.execute("PRAGMA foreign_keys = ON;")
+
+    # Allow multiple connections to read/write more safely
+    conn.execute("PRAGMA journal_mode = WAL;")
+
+    # Wait up to 30 seconds if the database is temporarily locked
+    conn.execute("PRAGMA busy_timeout = 30000;")
+
     return conn
 
 def hash_password(password: str) -> str:
